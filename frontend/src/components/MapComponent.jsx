@@ -1,38 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { Icon } from 'leaflet';
-import "./MapComponent.css"; 
+import { Icon } from "leaflet";
+import "./MapComponent.css";
 
-const MapComponent = ({ locations }) => {
-  const [currentPosition, setCurrentPosition] = useState(null);
+const MapComponent = ({ locations, currentPosition }) => {
   const [selectedLocation, setSelectedLocation] = useState(null);
 
   const redIcon = new Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.4/images/marker-shadow.png',
+    iconUrl:
+      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+    shadowUrl:
+      "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.4/images/marker-shadow.png",
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
-    shadowSize: [41, 41]
+    shadowSize: [41, 41],
   });
-
-  useEffect(() => {
-    const getCurrentPosition = () => {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCurrentPosition({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.error("Error getting current position:", error);
-        }
-      );
-    };
-    getCurrentPosition();
-  }, []);
 
   if (!currentPosition || locations.length === 0) return <div>Loading...</div>;
 

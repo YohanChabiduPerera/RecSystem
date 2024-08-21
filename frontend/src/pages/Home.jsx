@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import MapComponent from "../components/MapComponent";
 import {Box, Typography } from "@mui/material";
 
-const Home = () => {
+const Home = ({ currentPosition }) => {
   const [locations, setLocations] = useState([]);
   const sampleLocations = [
     { latitude: 6.9271, longitude: 79.8612 }, // Colombo
@@ -26,9 +26,9 @@ const Home = () => {
 
   return (
     <>
-      <MapComponent locations={locations} />
+      <MapComponent locations={locations} currentPosition={currentPosition}/>
     </>
   );
 };
 
-export default Home;
+export default Home
