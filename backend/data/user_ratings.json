@@ -1,0 +1,29 @@
+[
+    {
+        "user_id": "1",
+        "input_coordinates": [
+            40.952104500000004,
+            -74.09027591505819
+        ],
+        "venue_id": "4cc5cab41e596dcb1766da67",
+        "rating": 4
+    },
+    {
+        "user_id": "1",
+        "input_coordinates": [
+            40.75405465,
+            -73.9854937089544
+        ],
+        "venue_id": "4c8688ffd92ea093ea416f72",
+        "rating": 5
+    },
+    {
+        "user_id": "1",
+        "input_coordinates": [
+            40.7561496,
+            -73.98268556675947
+        ],
+        "venue_id": "4a5e2122f964a5200fbe1fe3",
+        "rating": 2
+    }
+]

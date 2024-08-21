@@ -27,34 +27,48 @@ const Home = () => {
   };
 
   const handleRateLocation = async () => {
+    const userId = localStorage.getItem("user_id");
+  
+    if (!userId || !selectedLocation) {
+      console.error("User ID or selected location is missing");
+      return;
+    }
+  
     try {
-      // Send the rating to the backend API
-      // await fetch(`/api/locations/${selectedLocation.id}/rate`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({ rating }),
-      // });
-      console.log(
-        "Rated location:",
-        selectedLocation.name,
-        "with rating:",
-        rating
-      );
+      const response = await fetch("http://127.0.0.1:5000/submit_rating", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          venue_id: selectedLocation.venue_id,
+          user_longitude: selectedLocation.longitude,
+          user_latitude: selectedLocation.latitude,
+          rating: rating,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+  
+      const data = await response.json();
+      console.log("Rating submitted successfully:", data);
     } catch (error) {
-      console.error("Error rating location:", error);
+      console.error("Error submitting rating:", error);
     }
   };
+  
 
   const handleRecommendNearbyVenues = async () => {
     const userId = localStorage.getItem("user_id");
-  
+
     if (!userId) {
       console.error("User ID not found in local storage");
       return;
     }
-  
+
     try {
       const response = await fetch(
         "http://127.0.0.1:5000/recommend_nearby_venues",
@@ -70,38 +84,90 @@ const Home = () => {
           }),
         }
       );
-  
+
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-  
+
       const data = await response.json();
-  
+
       if (data.recommended_venues.length === 0) {
         console.log("No venues found.");
         setLocations([]);
         return;
       }
-  
-      // Set only the first venue from the received data
+
       const venue = data.recommended_venues[0];
       const newLocation = {
-        id: 1, // You can use a fixed ID or modify as needed
+        id: 1, 
         latitude: venue.coordinates.latitude,
         longitude: venue.coordinates.longitude,
-        name: venue.location.split(",")[0], // Extract text before the first comma
-        rating: 0, // Default rating
+        name: venue.location.split(",")[0], 
+        venue_id: venue.venue_id,
+        rating: 0, 
       };
-  
+
       setLocations([newLocation]);
       setCurrentPosition({
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
       });
-  
+
       console.log("Recommended venue:", newLocation);
     } catch (error) {
       console.error("Error recommending nearby venues:", error);
+    }
+  };
+
+  const handleNextDestination = async () => {
+    const userId = localStorage.getItem("user_id");
+  
+    if (!userId) {
+      console.error("User ID not found in local storage");
+      return;
+    }
+  
+    try {
+      const userResponse = await fetch(`http://127.0.0.1:5000/getUserById/${userId}`);
+      if (!userResponse.ok) {
+        throw new Error("Failed to fetch user data");
+      }
+      const userData = await userResponse.json();
+      const { venue_history } = userData;
+  
+      const nextVenueResponse = await fetch("http://127.0.0.1:5000/predict_next_venue", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          venue_history: venue_history,
+        }),
+      });
+  
+      if (!nextVenueResponse.ok) {
+        throw new Error("Failed to predict next venue");
+      }
+  
+      const nextVenueData = await nextVenueResponse.json();
+      const { coordinates, exact_location, predicted_venue_id } = nextVenueData;
+  
+      const newLocation = {
+        id: locations.length + 1,
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        name: exact_location.split(",")[0],
+        venue_id: predicted_venue_id,
+        rating: 0,
+      };
+  
+      setSelectedLocation(null); // Clear the selected location to reset the polyline
+      setLocations([newLocation]);
+  
+      console.log("Next Destination:", newLocation);
+    } catch (error) {
+      console.error("Error predicting next destination:", error);
     }
   };
   
@@ -156,6 +222,14 @@ const Home = () => {
               onClick={handleRecommendNearbyVenues}
             >
               Recommend Nearby Venues
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleNextDestination}
+              sx={{ marginTop: 2 }}
+            >
+              Next Destination
             </Button>
           </Box>
           <Divider sx={{ margin: "16px 0" }} />
