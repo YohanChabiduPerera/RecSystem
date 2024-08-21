@@ -18,22 +18,31 @@ const SignIn = () => {
   const navigate = useNavigate();
 
   const handleSignIn = async () => {
-    const response = await fetch("users.json");
-    const users = await response.json();
+    try {
+      const response = await fetch("users.json");
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
 
-    const user = users.find(
-      (u) => u.username === username && u.password === password
-    );
-    if (user) {
-      localStorage.setItem("username", username);
-      // alert('Sign in successful!');
-      navigate("/");
-    } else {
-      alert("Invalid username or password");
+      const users = await response.json();
+
+      const user = users.find(
+        (u) => u.username === username && u.password === password
+      );
+
+      if (user) {
+        localStorage.setItem("username", username);
+        localStorage.setItem("user_id", user.user_id || ""); // Fetch user_id from the JSON and store it
+        navigate("/");
+      } else {
+        alert("Invalid username or password");
+      }
+
+      setUsername("");
+      setPassword("");
+    } catch (error) {
+      console.error("There was a problem with the fetch operation:", error);
     }
-
-    setUsername("");
-    setPassword("");
   };
 
   return (
