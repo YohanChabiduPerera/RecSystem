@@ -62,19 +62,22 @@ def signup():
     user_data = load_user_data()
 
     # Check if username already exists
-    if username in user_data:
+    if any(user['username'] == username for user in user_data):
         return jsonify({'error': 'Username already exists'}), 400
 
     # Create a new user ID
     user_id = str(len(user_data) + 1)
 
     # Initialize the user's venue history as an empty list
-    user_data = {
+    new_user = {
         'username': username,
         'userId': user_id,
         'password': password,
         'venue_history': []
     }
+
+    # Add the new user to the list
+    user_data.append(new_user)
 
     # Save updated user data
     save_user_data(user_data)
