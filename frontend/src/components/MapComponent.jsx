@@ -10,7 +10,7 @@ import "leaflet/dist/leaflet.css";
 import { Icon } from "leaflet";
 import "./MapComponent.css";
 
-const MapComponent = ({ locations, currentPosition }) => {
+const MapComponent = ({ locations, currentPosition, onLocationClick }) => {
   const [selectedLocation, setSelectedLocation] = useState(null);
 
   const redIcon = new Icon({
@@ -28,6 +28,7 @@ const MapComponent = ({ locations, currentPosition }) => {
 
   const handleMarkerClick = (location) => {
     setSelectedLocation(location);
+    onLocationClick(location);
   };
 
   const defaultLatLng = [currentPosition.latitude, currentPosition.longitude];
@@ -57,7 +58,9 @@ const MapComponent = ({ locations, currentPosition }) => {
             click: () => handleMarkerClick(location),
           }}
         >
-          <Popup>Location {index + 1}</Popup>
+          <Popup>
+            <strong>{location.name}</strong>
+          </Popup>
         </Marker>
       ))}
       {selectedLocation && (
