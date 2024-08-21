@@ -44,6 +44,14 @@ if not os.path.exists(USER_DATA_FILE):
     with open(USER_DATA_FILE, 'w') as file:
         json.dump({}, file)
 
+def save_user_data(user_data):
+    with open(USER_DATA_FILE, 'w') as file:
+        json.dump(user_data, file, indent=4)
+
+def load_user_data():
+    with open(USER_DATA_FILE, 'r') as file:
+        return json.load(file)
+
 def save_user(user_data):
     with open(USER_DATA_FILE, 'w') as file:
         json.dump({'users': user_data}, file, indent=4)
@@ -51,6 +59,24 @@ def save_user(user_data):
 def load_user():
     with open(USER_DATA_FILE, 'r') as file:
         return json.load(file).get('users', [])
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    username = data['username']
+    password = data['password']
+
+    # Load existing user data
+    user_data = load_user()
+
+    # Find the user with the provided username and password
+    for user in user_data:
+        if user['username'] == username and user['password'] == password:
+            return jsonify(user), 200
+    
+    # If authentication fails, return an error message
+    return jsonify({'error': 'Invalid username or password'}), 401
+
 
 @app.route('/signup', methods=['POST'])
 def signup():
