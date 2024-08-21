@@ -9,11 +9,13 @@ import {
   Grid,
   useTheme,
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const SignUp = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const theme = useTheme();
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const handleSignUp = async () => {
     const newUser = { username, password };
@@ -35,6 +37,8 @@ const SignUp = () => {
 
     setUsername('');
     setPassword('');
+
+    navigate('/signin'); // Navigate to sign-in page after successful signup
   };
 
   return (

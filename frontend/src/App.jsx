@@ -10,13 +10,11 @@ import SignIn from "../src/auth/SignIn";
 import Home from "./pages/Home";
 import NavBar from "./components/NavBar";
 import PrivateRoute from "./components/PrivateRoute";
-// import { VenueHistoryProvider } from "./context/VenueHistoryContext";
 
 function App() {
   const [currentPosition, setCurrentPosition] = useState(null);
 
   useEffect(() => {
-    // Get the user's current position
     const getCurrentPosition = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -34,7 +32,6 @@ function App() {
   }, []);
 
   return (
-    // <VenueHistoryProvider>
       <Router>
         <NavBar />
         <Routes>
@@ -51,7 +48,6 @@ function App() {
           <Route path="*" element={<Navigate to="/signin" replace />} />
         </Routes>
       </Router>
-    // </VenueHistoryProvider>
   );
 }
 

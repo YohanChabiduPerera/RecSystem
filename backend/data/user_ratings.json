@@ -25,5 +25,14 @@
         ],
         "venue_id": "4a5e2122f964a5200fbe1fe3",
         "rating": 2
+    },
+    {
+        "user_id": "2",
+        "input_coordinates": [
+            40.76258455,
+            -73.97378589900542
+        ],
+        "venue_id": "4a733937f964a520dadb1fe3",
+        "rating": 4
     }
 ]

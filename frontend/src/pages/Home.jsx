@@ -162,7 +162,7 @@ const Home = () => {
         rating: 0,
       };
   
-      setSelectedLocation(null); // Clear the selected location to reset the polyline
+      setSelectedLocation(null); 
       setLocations([newLocation]);
   
       console.log("Next Destination:", newLocation);

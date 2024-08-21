@@ -10,12 +10,10 @@ import {
   useTheme,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-// import { VenueHistoryContext } from "../context/VenueHistoryContext";
 
 const SignIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  // const { venueHistory, setVenueHistory } = useContext(VenueHistoryContext); // Use context here
   const [venueHistory, setVenueHistory] = useState([]);
   const theme = useTheme();
   const navigate = useNavigate();

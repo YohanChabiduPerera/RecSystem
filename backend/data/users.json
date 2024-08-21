@@ -28,6 +28,15 @@
                 "4eca62a99adf9c7bf6626dc2",
                 "4a5e2122f964a5200fbe1fe3"
             ]
+        },
+        {
+            "username": "ranuja",
+            "user_id": "2",
+            "password": "123",
+            "venue_history": [
+                "4c142036b7b9c92848dfaa37",
+                "4a733937f964a520dadb1fe3"
+            ]
         }
     ]
 }
