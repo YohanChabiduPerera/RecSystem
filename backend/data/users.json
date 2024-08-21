@@ -4,7 +4,10 @@
             "username": "yohan",
             "userId": "1",
             "password": "123",
-            "venue_history": []
+            "venue_history": [
+                "4c142036b7b9c92848dfaa37",
+                "4c142036b7b9c92848dfaa37"
+            ]
         }
     ]
 }

@@ -19,32 +19,38 @@ const SignIn = () => {
 
   const handleSignIn = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:5000/signin");
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
+      const response = await fetch("http://127.0.0.1:5000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password,
+        }),
+      });
+  
       const data = await response.json();
-      const users = data.users;
-
-      const user = users.find(
-        (u) => u.username === username && u.password === password
-      );
-
-      if (user) {
+  
+      // Directly check if the returned data matches the input credentials
+      if (
+        data.username === username &&
+        data.password === password
+      ) {
         localStorage.setItem("username", username);
-        localStorage.setItem("user_id", user.userId || ""); // Use userId from the JSON
+        localStorage.setItem("user_id", data.user_id || ""); // Use userId from the JSON
         navigate("/");
       } else {
         alert("Invalid username or password");
       }
-
+  
       setUsername("");
       setPassword("");
     } catch (error) {
       console.error("There was a problem with the fetch operation:", error);
     }
   };
+  
 
   return (
     <Container

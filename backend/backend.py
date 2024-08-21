@@ -66,6 +66,8 @@ def login():
     username = data['username']
     password = data['password']
 
+    print("username", username)
+    print("password", password)
     # Load existing user data
     user_data = load_user()
 
