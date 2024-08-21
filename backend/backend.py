@@ -52,6 +52,14 @@ def load_user_data():
     with open(USER_DATA_FILE, 'r') as file:
         return json.load(file)
 
+def save_user(user_data):
+    with open(USER_DATA_FILE, 'w') as file:
+        json.dump({'users': user_data}, file, indent=4)
+
+def load_user():
+    with open(USER_DATA_FILE, 'r') as file:
+        return json.load(file).get('users', [])
+
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()
@@ -59,7 +67,7 @@ def signup():
     password = data['password']
 
     # Load existing user data
-    user_data = load_user_data()
+    user_data = load_user()
 
     # Check if username already exists
     if any(user['username'] == username for user in user_data):
@@ -76,11 +84,11 @@ def signup():
         'venue_history': []
     }
 
-    # Add the new user to the list
+    # Append the new user to the list of users
     user_data.append(new_user)
 
     # Save updated user data
-    save_user_data(user_data)
+    save_user(user_data)
 
     return jsonify({'message': 'Signup successful', 'userId': user_id})
 
@@ -100,12 +108,13 @@ def predict_next_venue():
     predicted_venue_id = le_venue.inverse_transform([lstm_prediction])[0]
 
     # Save the predicted venue ID to the user's venue history
-    user_data = load_user_data()
-    for username, user_info in user_data.items():
+    user_data = load_user()
+    for user_info in user_data:
         if user_info['userId'] == user_id:
             user_info['venue_history'].append(predicted_venue_id)
             break
-    save_user_data(user_data)
+    save_user(user_data)
+
 
     # Find the venue category and location
     predicted_venue_row = df[df['venueId'] == predicted_venue_id].iloc[0]
@@ -173,12 +182,12 @@ def recommend_nearby_venues():
     # Save the first recommended venue ID to the user's venue history
     first_recommended_venue_id = recommended_venue_ids[0] if recommended_venue_ids else None
     if first_recommended_venue_id:
-        user_data = load_user_data()
-        for username, user_info in user_data.items():
+        user_data = load_user()
+        for user_info in user_data:
             if user_info['userId'] == user_id:
                 user_info['venue_history'].append(first_recommended_venue_id)
                 break
-        save_user_data(user_data)
+        save_user(user_data)
 
     # Prepare the response
     venue_list = []
