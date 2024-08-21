@@ -1,7 +1,10 @@
 {
-    "yohan": {
-        "userId": "1",
-        "password": "123",
-        "venue_history": []
-    }
+    "users": [
+        {
+            "username": "yohan",
+            "userId": "1",
+            "password": "123",
+            "venue_history": []
+        }
+    ]
 }
