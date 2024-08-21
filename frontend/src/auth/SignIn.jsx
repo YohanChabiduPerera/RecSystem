@@ -19,12 +19,13 @@ const SignIn = () => {
 
   const handleSignIn = async () => {
     try {
-      const response = await fetch("users.json");
+      const response = await fetch("http://127.0.0.1:5000/signin");
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
 
-      const users = await response.json();
+      const data = await response.json();
+      const users = data.users;
 
       const user = users.find(
         (u) => u.username === username && u.password === password
@@ -32,7 +33,7 @@ const SignIn = () => {
 
       if (user) {
         localStorage.setItem("username", username);
-        localStorage.setItem("user_id", user.user_id || ""); // Fetch user_id from the JSON and store it
+        localStorage.setItem("user_id", user.userId || ""); // Use userId from the JSON
         navigate("/");
       } else {
         alert("Invalid username or password");
