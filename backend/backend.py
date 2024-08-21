@@ -80,6 +80,20 @@ def login():
     return jsonify({'error': 'Invalid username or password'}), 401
 
 
+@app.route('/getUserById/<user_id>', methods=['GET'])
+def get_user_by_id(user_id):
+    # Load existing user data
+    user_data = load_user()
+
+    # Find the user with the provided user_id
+    for user in user_data:
+        if user['user_id'] == user_id:
+            return jsonify(user), 200
+    
+    # If user is not found, return an error message
+    return jsonify({'error': 'User not found'}), 404
+
+
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()
