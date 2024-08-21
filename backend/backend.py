@@ -44,14 +44,6 @@ if not os.path.exists(USER_DATA_FILE):
     with open(USER_DATA_FILE, 'w') as file:
         json.dump({}, file)
 
-def save_user_data(user_data):
-    with open(USER_DATA_FILE, 'w') as file:
-        json.dump(user_data, file, indent=4)
-
-def load_user_data():
-    with open(USER_DATA_FILE, 'r') as file:
-        return json.load(file)
-
 def save_user(user_data):
     with open(USER_DATA_FILE, 'w') as file:
         json.dump({'users': user_data}, file, indent=4)
