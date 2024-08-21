@@ -10,6 +10,7 @@ import SignIn from "../src/auth/SignIn";
 import Home from "./pages/Home";
 import NavBar from "./components/NavBar";
 import PrivateRoute from "./components/PrivateRoute";
+// import { VenueHistoryProvider } from "./context/VenueHistoryContext";
 
 function App() {
   const [currentPosition, setCurrentPosition] = useState(null);
@@ -33,22 +34,24 @@ function App() {
   }, []);
 
   return (
-    <Router>
-      <NavBar />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <PrivateRoute>
-              <Home currentPosition={currentPosition} />
-            </PrivateRoute>
-          }
-        />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="*" element={<Navigate to="/signin" replace />} />
-      </Routes>
-    </Router>
+    // <VenueHistoryProvider>
+      <Router>
+        <NavBar />
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <Home currentPosition={currentPosition} />
+              </PrivateRoute>
+            }
+          />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="*" element={<Navigate to="/signin" replace />} />
+        </Routes>
+      </Router>
+    // </VenueHistoryProvider>
   );
 }
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   TextField,
   Button,
@@ -10,10 +10,13 @@ import {
   useTheme,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+// import { VenueHistoryContext } from "../context/VenueHistoryContext";
 
 const SignIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  // const { venueHistory, setVenueHistory } = useContext(VenueHistoryContext); // Use context here
+  const [venueHistory, setVenueHistory] = useState([]);
   const theme = useTheme();
   const navigate = useNavigate();
 
@@ -32,13 +35,10 @@ const SignIn = () => {
   
       const data = await response.json();
   
-      // Directly check if the returned data matches the input credentials
-      if (
-        data.username === username &&
-        data.password === password
-      ) {
+      if (data.username === username && data.password === password) {
         localStorage.setItem("username", username);
-        localStorage.setItem("user_id", data.user_id || ""); // Use userId from the JSON
+        localStorage.setItem("user_id", data.user_id || ""); 
+        setVenueHistory(data.venue_history); 
         navigate("/");
       } else {
         alert("Invalid username or password");
@@ -50,7 +50,6 @@ const SignIn = () => {
       console.error("There was a problem with the fetch operation:", error);
     }
   };
-  
 
   return (
     <Container
