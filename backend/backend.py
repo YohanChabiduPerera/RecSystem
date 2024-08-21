@@ -97,7 +97,7 @@ def signup():
     # Initialize the user's venue history as an empty list
     new_user = {
         'username': username,
-        'userId': user_id,
+        'user_id': user_id,
         'password': password,
         'venue_history': []
     }
@@ -128,7 +128,7 @@ def predict_next_venue():
     # Save the predicted venue ID to the user's venue history
     user_data = load_user()
     for user_info in user_data:
-        if user_info['userId'] == user_id:
+        if user_info['user_id'] == user_id:
             user_info['venue_history'].append(predicted_venue_id)
             break
     save_user(user_data)
@@ -202,7 +202,7 @@ def recommend_nearby_venues():
     if first_recommended_venue_id:
         user_data = load_user()
         for user_info in user_data:
-            if user_info['userId'] == user_id:
+            if user_info['user_id'] == user_id:
                 user_info['venue_history'].append(first_recommended_venue_id)
                 break
         save_user(user_data)
