@@ -117,7 +117,7 @@ def signup():
 def predict_next_venue():
     data = request.get_json()
     user_id = data['user_id']
-    user_history = data['user_history']
+    user_history = data['venue_history']
 
     # Prepare the last 10 venues visited by the user
     sample_sequence = le_venue.transform(user_history[-10:])
