@@ -18,6 +18,7 @@ const SignIn = () => {
   const theme = useTheme();
   const navigate = useNavigate();
 
+  // sign in
   const handleSignIn = async () => {
     try {
       const response = await fetch("http://127.0.0.1:5000/login", {
@@ -32,7 +33,7 @@ const SignIn = () => {
       });
   
       const data = await response.json();
-  
+      // store username and user_id at local storage
       if (data.username === username && data.password === password) {
         localStorage.setItem("username", username);
         localStorage.setItem("user_id", data.user_id || ""); 

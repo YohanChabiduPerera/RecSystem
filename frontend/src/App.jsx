@@ -14,6 +14,7 @@ import PrivateRoute from "./components/PrivateRoute";
 function App() {
   const [currentPosition, setCurrentPosition] = useState(null);
 
+  // get gurrent location
   useEffect(() => {
     const getCurrentPosition = () => {
       navigator.geolocation.getCurrentPosition(

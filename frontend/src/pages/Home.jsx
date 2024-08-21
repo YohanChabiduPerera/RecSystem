@@ -21,19 +21,21 @@ const Home = () => {
     longitude: 0,
   });
 
+  // handle location click
   const handleLocationClick = (location) => {
     setSelectedLocation(location);
     setRating(location.rating);
   };
 
+  // rate location
   const handleRateLocation = async () => {
     const userId = localStorage.getItem("user_id");
-  
+
     if (!userId || !selectedLocation) {
       console.error("User ID or selected location is missing");
       return;
     }
-  
+
     try {
       const response = await fetch("http://127.0.0.1:5000/submit_rating", {
         method: "POST",
@@ -48,19 +50,19 @@ const Home = () => {
           rating: rating,
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-  
+
       const data = await response.json();
       console.log("Rating submitted successfully:", data);
     } catch (error) {
       console.error("Error submitting rating:", error);
     }
   };
-  
 
+  // handle near by venue
   const handleRecommendNearbyVenues = async () => {
     const userId = localStorage.getItem("user_id");
 
@@ -97,14 +99,15 @@ const Home = () => {
         return;
       }
 
+      // re structure json format
       const venue = data.recommended_venues[0];
       const newLocation = {
-        id: 1, 
+        id: 1,
         latitude: venue.coordinates.latitude,
         longitude: venue.coordinates.longitude,
-        name: venue.location.split(",")[0], 
+        name: venue.location.split(",")[0],
         venue_id: venue.venue_id,
-        rating: 0, 
+        rating: 0,
       };
 
       setLocations([newLocation]);
@@ -119,40 +122,48 @@ const Home = () => {
     }
   };
 
+    // handle next destination
   const handleNextDestination = async () => {
     const userId = localStorage.getItem("user_id");
-  
+
     if (!userId) {
       console.error("User ID not found in local storage");
       return;
     }
-  
+
     try {
-      const userResponse = await fetch(`http://127.0.0.1:5000/getUserById/${userId}`);
+      // get the venue history 
+      const userResponse = await fetch(
+        `http://127.0.0.1:5000/getUserById/${userId}`
+      );
       if (!userResponse.ok) {
         throw new Error("Failed to fetch user data");
       }
       const userData = await userResponse.json();
       const { venue_history } = userData;
-  
-      const nextVenueResponse = await fetch("http://127.0.0.1:5000/predict_next_venue", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user_id: userId,
-          venue_history: venue_history,
-        }),
-      });
-  
+
+      const nextVenueResponse = await fetch(
+        "http://127.0.0.1:5000/predict_next_venue",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: userId,
+            venue_history: venue_history,
+          }),
+        }
+      );
+
       if (!nextVenueResponse.ok) {
         throw new Error("Failed to predict next venue");
       }
-  
+
       const nextVenueData = await nextVenueResponse.json();
       const { coordinates, exact_location, predicted_venue_id } = nextVenueData;
-  
+
+      // re structure json format
       const newLocation = {
         id: locations.length + 1,
         latitude: coordinates.latitude,
@@ -161,16 +172,15 @@ const Home = () => {
         venue_id: predicted_venue_id,
         rating: 0,
       };
-  
-      setSelectedLocation(null); 
+
+      setSelectedLocation(null);
       setLocations([newLocation]);
-  
+
       console.log("Next Destination:", newLocation);
     } catch (error) {
       console.error("Error predicting next destination:", error);
     }
   };
-  
 
   return (
     <Grid container spacing={4}>

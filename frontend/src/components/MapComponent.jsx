@@ -13,6 +13,7 @@ import "./MapComponent.css";
 const MapComponent = ({ locations, currentPosition, onLocationClick }) => {
   const [selectedLocation, setSelectedLocation] = useState(null);
 
+  // custom red icon for predicted location
   const redIcon = new Icon({
     iconUrl:
       "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
