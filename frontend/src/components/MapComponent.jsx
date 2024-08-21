@@ -2,22 +2,12 @@ import React, { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Icon } from 'leaflet';
-import "./MapComponent.css"; // Import custom CSS file
+import "./MapComponent.css"; 
 
-const MapComponent = () => {
-  // Sample coordinates for testing in Sri Lanka
-  const sampleLocations = [
-    { latitude: 6.9271, longitude: 79.8612 }, // Colombo
-    { latitude: 7.2906, longitude: 80.6337 }, // Kandy
-    { latitude: 6.0214, longitude: 80.217 }, // Galle
-    { latitude: 8.4894, longitude: 80.4085 }, // Jaffna
-  ];
-
-  const [locations, setLocations] = useState([]);
+const MapComponent = ({ locations }) => {
   const [currentPosition, setCurrentPosition] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
 
-  // Create a custom red icon for the current location marker
   const redIcon = new Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.4/images/marker-shadow.png',
@@ -28,22 +18,6 @@ const MapComponent = () => {
   });
 
   useEffect(() => {
-    // Fetch coordinates from the backend
-    const fetchLocations = async () => {
-      try {
-        // const response = await fetch("/api/locations"); // Update with your backend endpoint
-        // const data = await response.json();
-        setLocations(sampleLocations);
-        // setLocations(data); // Assuming data is an array of { latitude: number, longitude: number }
-      } catch (error) {
-        console.error("Error fetching locations:", error);
-      }
-    };
-    fetchLocations();
-  }, []);
-
-  useEffect(() => {
-    // Get the user's current position
     const getCurrentPosition = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
