@@ -1,3 +1,5 @@
+import json
+import os
 import pickle
 from flask import Flask, request, jsonify
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
@@ -6,6 +8,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from geopy.geocoders import Nominatim
 import pandas as pd
+
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -32,6 +35,52 @@ df = pd.read_csv('./data/dataset_TSMC2014_NYC.csv')
 
 geolocator = Nominatim(user_agent="venue_locator")
 
+
+# JSON file to store user data
+USER_DATA_FILE = './data/users.json'
+
+# Ensure the user data file exists
+if not os.path.exists(USER_DATA_FILE):
+    with open(USER_DATA_FILE, 'w') as file:
+        json.dump({}, file)
+
+def save_user_data(user_data):
+    with open(USER_DATA_FILE, 'w') as file:
+        json.dump(user_data, file, indent=4)
+
+def load_user_data():
+    with open(USER_DATA_FILE, 'r') as file:
+        return json.load(file)
+
+@app.route('/signup', methods=['POST'])
+def signup():
+    data = request.get_json()
+    username = data['username']
+    password = data['password']
+
+    # Load existing user data
+    user_data = load_user_data()
+
+    # Check if username already exists
+    if username in user_data:
+        return jsonify({'error': 'Username already exists'}), 400
+
+    # Create a new user ID
+    user_id = str(len(user_data) + 1)
+
+    # Initialize the user's venue history as an empty list
+    user_data[username] = {
+        'userId': user_id,
+        'password': password,
+        'venue_history': []
+    }
+
+    # Save updated user data
+    save_user_data(user_data)
+
+    return jsonify({'message': 'Signup successful', 'userId': user_id})
+
+
 @app.route('/predict_next_venue', methods=['POST'])
 def predict_next_venue():
     data = request.get_json()
@@ -53,16 +102,45 @@ def predict_next_venue():
     predicted_venue_longitude = predicted_venue_row['longitude']
 
     # Get the exact location using reverse geocoding
-    exact_location, coordinates = get_exact_location(predicted_venue_latitude, predicted_venue_longitude)
+    exact_location = get_exact_location(predicted_venue_latitude, predicted_venue_longitude)
 
     response = {
         'predicted_venue_id': predicted_venue_id,
         'predicted_venue_category': predicted_venue_category,
-        'exact_location': exact_location,
-        'coordinates': coordinates
+        'exact_location': exact_location
     }
 
     return jsonify(response)
+
+@app.route('/submit_rating', methods=['POST'])
+def submit_rating():
+    data = request.get_json()
+    user_id = data['user_id']
+    venue_id = data['venue_id']
+    rating = data['rating']
+    user_latitude = data['user_latitude']
+    user_longitude = data['user_longitude']
+
+    # Load existing ratings from file or create a new list if the file does not exist
+    try:
+        with open('./data/user_ratings.json', 'r') as file:
+            user_ratings = json.load(file)
+    except FileNotFoundError:
+        user_ratings = []
+
+    # Add the new rating
+    user_ratings.append({
+        'user_id': user_id,
+        "input_coordinates": [user_latitude, user_longitude], 
+        'venue_id': venue_id,
+        'rating': rating
+    })
+
+    # Save the updated ratings back to the file
+    with open('./data/user_ratings.json', 'w') as file:
+        json.dump(user_ratings, file, indent=4)
+
+    return jsonify({'message': 'Rating submitted successfully'})
 
 @app.route('/recommend_nearby_venues', methods=['POST'])
 def recommend_nearby_venues():
@@ -83,12 +161,11 @@ def recommend_nearby_venues():
     # Prepare the response
     venue_list = []
     for _, venue in recommended_venues.iterrows():
-        exact_location, coordinates = get_exact_location(venue['latitude'], venue['longitude'])
+        exact_location = get_exact_location(venue['latitude'], venue['longitude'])
         venue_list.append({
             'venue_id': venue['venueId'],
             'venue_category': venue['venueCategory'],
-            'location': exact_location,
-            'coordinates': coordinates
+            'location': exact_location
         })
 
     response = {
@@ -100,15 +177,7 @@ def recommend_nearby_venues():
 
 def get_exact_location(latitude, longitude):
     location = geolocator.reverse((latitude, longitude), exactly_one=True)
-    if location:
-        address = location.address
-        coordinates = {
-            'latitude': location.latitude,
-            'longitude': location.longitude
-        }
-        return address, coordinates
-    else:
-        return "Location not found", {'latitude': latitude, 'longitude': longitude}
+    return location.address if location else "Location not found"
 
 if __name__ == '__main__':
     app.run(debug=True)
