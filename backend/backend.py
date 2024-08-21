@@ -140,13 +140,14 @@ def predict_next_venue():
     predicted_venue_latitude = predicted_venue_row['latitude']
     predicted_venue_longitude = predicted_venue_row['longitude']
 
-    # Get the exact location using reverse geocoding
-    exact_location = get_exact_location(predicted_venue_latitude, predicted_venue_longitude)
+     # Get the exact location using reverse geocoding
+    exact_location, coordinates = get_exact_location(predicted_venue_latitude, predicted_venue_longitude)
 
     response = {
         'predicted_venue_id': predicted_venue_id,
         'predicted_venue_category': predicted_venue_category,
-        'exact_location': exact_location
+        'exact_location': exact_location,
+        'coordinates': coordinates
     }
 
     return jsonify(response)
@@ -210,11 +211,12 @@ def recommend_nearby_venues():
     # Prepare the response
     venue_list = []
     for _, venue in recommended_venues.iterrows():
-        exact_location = get_exact_location(venue['latitude'], venue['longitude'])
+        exact_location, coordinates = get_exact_location(venue['latitude'], venue['longitude'])
         venue_list.append({
             'venue_id': venue['venueId'],
             'venue_category': venue['venueCategory'],
-            'location': exact_location
+            'location': exact_location,
+            'coordinates': coordinates
         })
 
     response = {
@@ -226,7 +228,15 @@ def recommend_nearby_venues():
 
 def get_exact_location(latitude, longitude):
     location = geolocator.reverse((latitude, longitude), exactly_one=True)
-    return location.address if location else "Location not found"
+    if location:
+        address = location.address
+        coordinates = {
+            'latitude': location.latitude,
+            'longitude': location.longitude
+        }
+        return address, coordinates
+    else:
+        return "Location not found", {'latitude': latitude, 'longitude': longitude}
 
 if __name__ == '__main__':
     app.run(debug=True)
