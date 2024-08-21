@@ -18,12 +18,20 @@ const SignUp = () => {
   const handleSignUp = async () => {
     const newUser = { username, password };
 
-    const response = await fetch('/users.json');
+    const response = await fetch(
+      "http://127.0.0.1:5000/signup",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password
+        }),
+      }
+    );
     const users = await response.json();
-
-    users.push(newUser);
-
-    console.log('Updated users:', users);
 
     setUsername('');
     setPassword('');
