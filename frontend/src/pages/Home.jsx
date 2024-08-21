@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Grid,
   Box,
@@ -10,33 +10,16 @@ import {
 } from "@mui/material";
 import MapComponent from "../components/MapComponent";
 
-const Home = ({ currentPosition }) => {
-  const sampleLocations = [
-    { id: 1, latitude: 6.9271, longitude: 79.8612, name: "Colombo", rating: 4 },
-    { id: 2, latitude: 7.2906, longitude: 80.6337, name: "Kandy", rating: 3 },
-    { id: 3, latitude: 6.0214, longitude: 80.217, name: "Galle", rating: 5 },
-    { id: 4, latitude: 8.4894, longitude: 80.4085, name: "Jaffna", rating: 4 },
-  ];
-
+const Home = () => {
   const [locations, setLocations] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [rating, setRating] = useState(0);
   const [longitude, setLongitude] = useState("");
   const [latitude, setLatitude] = useState("");
-
-  useEffect(() => {
-    const fetchLocations = async () => {
-      try {
-        // Replace with your actual API call
-        // const response = await fetch("/api/locations");
-        // const data = await response.json();
-        setLocations(sampleLocations);
-      } catch (error) {
-        console.error("Error fetching locations:", error);
-      }
-    };
-    fetchLocations();
-  }, []);
+  const [currentPosition, setCurrentPosition] = useState({
+    latitude: 0,
+    longitude: 0,
+  });
 
   const handleLocationClick = (location) => {
     setSelectedLocation(location);
@@ -66,12 +49,12 @@ const Home = ({ currentPosition }) => {
 
   const handleRecommendNearbyVenues = async () => {
     const userId = localStorage.getItem("user_id");
-
+  
     if (!userId) {
       console.error("User ID not found in local storage");
       return;
     }
-
+  
     try {
       const response = await fetch(
         "http://127.0.0.1:5000/recommend_nearby_venues",
@@ -87,17 +70,41 @@ const Home = ({ currentPosition }) => {
           }),
         }
       );
-
+  
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-
+  
       const data = await response.json();
-      console.log("Recommended venues:", data);
+  
+      if (data.recommended_venues.length === 0) {
+        console.log("No venues found.");
+        setLocations([]);
+        return;
+      }
+  
+      // Set only the first venue from the received data
+      const venue = data.recommended_venues[0];
+      const newLocation = {
+        id: 1, // You can use a fixed ID or modify as needed
+        latitude: venue.coordinates.latitude,
+        longitude: venue.coordinates.longitude,
+        name: venue.location.split(",")[0], // Extract text before the first comma
+        rating: 0, // Default rating
+      };
+  
+      setLocations([newLocation]);
+      setCurrentPosition({
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
+      });
+  
+      console.log("Recommended venue:", newLocation);
     } catch (error) {
       console.error("Error recommending nearby venues:", error);
     }
   };
+  
 
   return (
     <Grid container spacing={4}>
