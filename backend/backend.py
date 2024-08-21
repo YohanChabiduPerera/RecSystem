@@ -69,7 +69,8 @@ def signup():
     user_id = str(len(user_data) + 1)
 
     # Initialize the user's venue history as an empty list
-    user_data[username] = {
+    user_data = {
+        'username': username,
         'userId': user_id,
         'password': password,
         'venue_history': []
@@ -94,6 +95,14 @@ def predict_next_venue():
     # Predict the next venue
     lstm_prediction = lstm_model.predict(sample_sequence).argmax(axis=1)[0]
     predicted_venue_id = le_venue.inverse_transform([lstm_prediction])[0]
+
+    # Save the predicted venue ID to the user's venue history
+    user_data = load_user_data()
+    for username, user_info in user_data.items():
+        if user_info['userId'] == user_id:
+            user_info['venue_history'].append(predicted_venue_id)
+            break
+    save_user_data(user_data)
 
     # Find the venue category and location
     predicted_venue_row = df[df['venueId'] == predicted_venue_id].iloc[0]
@@ -157,6 +166,16 @@ def recommend_nearby_venues():
     recommended_venues = df.iloc[knn_indices[0]]
     recommended_venue_ids = recommended_venues['venueId'].unique().tolist()
     recommended_venue_categories = recommended_venues['venueCategory'].unique().tolist()
+
+    # Save the first recommended venue ID to the user's venue history
+    first_recommended_venue_id = recommended_venue_ids[0] if recommended_venue_ids else None
+    if first_recommended_venue_id:
+        user_data = load_user_data()
+        for username, user_info in user_data.items():
+            if user_info['userId'] == user_id:
+                user_info['venue_history'].append(first_recommended_venue_id)
+                break
+        save_user_data(user_data)
 
     # Prepare the response
     venue_list = []
