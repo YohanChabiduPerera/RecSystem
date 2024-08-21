@@ -6,8 +6,10 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from geopy.geocoders import Nominatim
 import pandas as pd
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 # Load the saved models and encoders/scalers
 with open('./modelv2/lstm_model.pkl', 'rb') as file:
