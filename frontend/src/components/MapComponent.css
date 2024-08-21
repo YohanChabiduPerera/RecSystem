@@ -1,0 +1,9 @@
+/* MapComponent.css */
+.current-location-icon {
+    background-color: red !important;
+  }
+  
+  .location-icon {
+    background-color: green !important;
+  }
+  
