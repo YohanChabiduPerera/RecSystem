@@ -69,15 +69,15 @@ const Home = () => {
   // handle near by venue
   const handleRecommendNearbyVenues = async () => {
     const userId = localStorage.getItem("user_id");
-
+  
     if (!userId) {
       toast.error("User ID not found in local storage");
       return;
     }
-
+  
     try {
       const response = await fetch(
-        "http://127.0.0.1:5000/recommend_nearby_venues",
+        "http://127.0.0.1:5000/recommend_destination",
         {
           method: "POST",
           headers: {
@@ -90,36 +90,35 @@ const Home = () => {
           }),
         }
       );
-
+  
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-
+  
       const data = await response.json();
-
-      if (data.recommended_venues.length === 0) {
+  
+      if (!data || !data.coordinates || !data.location || !data.venue_id) {
         toast.info("No venues found.");
         setLocations([]);
         return;
       }
-
-      // re structure json format
-      const venue = data.recommended_venues[0];
+  
+      // Structure the data for the MapComponent
       const newLocation = {
-        id: 1,
-        latitude: venue.coordinates.latitude,
-        longitude: venue.coordinates.longitude,
-        name: venue.location.split(",")[0],
-        venue_id: venue.venue_id,
+        id: 1, // You might want to generate a unique ID for each location
+        latitude: data.coordinates.latitude,
+        longitude: data.coordinates.longitude,
+        name: data.location.split(",")[0],
+        venue_id: data.venue_id,
         rating: 0,
       };
-
+  
       setLocations([newLocation]);
       setCurrentPosition({
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
       });
-
+  
       toast.success("Recommended venue fetched successfully");
       console.log("Recommended venue:", newLocation);
     } catch (error) {
@@ -127,7 +126,7 @@ const Home = () => {
       console.error("Error recommending nearby venues:", error);
     }
   };
-
+  
   return (
     <Grid container spacing={4}>
       <ToastContainer />
