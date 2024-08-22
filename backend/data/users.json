@@ -1,18 +1,2 @@
 {
-    "users": [
-        {
-            "username": "luffy",
-            "user_id": "1",
-            "password": "123",
-            "venue_history": []
-        },
-        {
-            "username": "zoro",
-            "user_id": "69",
-            "password": "123",
-            "venue_history": [
-                "4c142036b7b9c92848dfaa37"
-            ]
-        }
-    ]
 }

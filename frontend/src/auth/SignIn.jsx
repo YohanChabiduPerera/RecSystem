@@ -43,7 +43,7 @@ const SignIn = () => {
         setPassword('');
         setTimeout(() => {
           navigate('/');
-        }, 1000); // Delay navigation by 1 second
+        }, 1000);
       } else {
         toast.error('Invalid username or password');
       }

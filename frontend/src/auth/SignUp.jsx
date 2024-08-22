@@ -44,7 +44,7 @@ const SignUp = () => {
         setPassword('');
         setTimeout(() => {
           navigate('/signin');
-        }, 1000); // Delay navigation by 1 second
+        }, 1000); 
       } else {
         toast.error(data.message || 'Sign up failed. Please try again.');
       }

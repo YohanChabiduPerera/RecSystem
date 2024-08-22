@@ -102,10 +102,9 @@ const Home = () => {
         setLocations([]);
         return;
       }
-  
-      // Structure the data for the MapComponent
+      // re structure format
       const newLocation = {
-        id: 1, // You might want to generate a unique ID for each location
+        id: 1,
         latitude: data.coordinates.latitude,
         longitude: data.coordinates.longitude,
         name: data.location.split(",")[0],
