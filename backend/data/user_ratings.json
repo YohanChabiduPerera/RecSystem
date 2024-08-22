@@ -34,5 +34,32 @@
         ],
         "venue_id": "4a733937f964a520dadb1fe3",
         "rating": 4
+    },
+    {
+        "user_id": "1",
+        "input_coordinates": [
+            40.891459350000005,
+            -74.22291086217749
+        ],
+        "venue_id": "4c142036b7b9c92848dfaa37",
+        "rating": 2
+    },
+    {
+        "user_id": "1",
+        "input_coordinates": [
+            40.891459350000005,
+            -74.22291086217749
+        ],
+        "venue_id": "4c142036b7b9c92848dfaa37",
+        "rating": 2
+    },
+    {
+        "user_id": "3",
+        "input_coordinates": [
+            40.891459350000005,
+            -74.22291086217749
+        ],
+        "venue_id": "4c142036b7b9c92848dfaa37",
+        "rating": 2
     }
 ]

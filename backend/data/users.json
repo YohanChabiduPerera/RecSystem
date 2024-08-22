@@ -26,7 +26,11 @@
                 "4e286bb01fc7f0a6e14995a7",
                 "4c8688ffd92ea093ea416f72",
                 "4eca62a99adf9c7bf6626dc2",
-                "4a5e2122f964a5200fbe1fe3"
+                "4a5e2122f964a5200fbe1fe3",
+                "4c142036b7b9c92848dfaa37",
+                "4c142036b7b9c92848dfaa37",
+                "4c142036b7b9c92848dfaa37",
+                "4c142036b7b9c92848dfaa37"
             ]
         },
         {
@@ -37,6 +41,20 @@
                 "4c142036b7b9c92848dfaa37",
                 "4a733937f964a520dadb1fe3"
             ]
+        },
+        {
+            "username": "luffy",
+            "user_id": "3",
+            "password": "123",
+            "venue_history": [
+                "4c142036b7b9c92848dfaa37"
+            ]
+        },
+        {
+            "username": "luffy1",
+            "user_id": "4",
+            "password": "123",
+            "venue_history": []
         }
     ]
 }

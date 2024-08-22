@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from 'react';
 import {
   TextField,
   Button,
@@ -8,13 +8,14 @@ import {
   Paper,
   Grid,
   useTheme,
-} from "@mui/material";
-import { useNavigate } from "react-router-dom";
+} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const SignIn = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [venueHistory, setVenueHistory] = useState([]);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const theme = useTheme();
   const navigate = useNavigate();
 
@@ -31,22 +32,24 @@ const SignIn = () => {
           password: password,
         }),
       });
-  
+
       const data = await response.json();
-      // store username and user_id at local storage
-      if (data.username === username && data.password === password) {
+
+      if (response.ok && data.username === username) {
         localStorage.setItem("username", username);
         localStorage.setItem("user_id", data.user_id || ""); 
-        setVenueHistory(data.venue_history); 
-        navigate("/");
+        toast.success('Sign in successful!');
+        setUsername('');
+        setPassword('');
+        setTimeout(() => {
+          navigate('/');
+        }, 1000); // Delay navigation by 1 second
       } else {
-        alert("Invalid username or password");
+        toast.error('Invalid username or password');
       }
-  
-      setUsername("");
-      setPassword("");
     } catch (error) {
-      console.error("There was a problem with the fetch operation:", error);
+      toast.error('There was a problem with the sign-in process.');
+      console.error('Sign in error:', error);
     }
   };
 
@@ -55,30 +58,27 @@ const SignIn = () => {
       component="main"
       maxWidth="xs"
       sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
         backgroundColor: theme.palette.background.default,
       }}
     >
+      <ToastContainer />
       <Paper
         elevation={6}
         sx={{
           padding: 4,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          width: "100%",
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
           maxWidth: 400,
           borderRadius: 4,
         }}
       >
-        <Typography
-          variant="h4"
-          gutterBottom
-          color={theme.palette.primary.main}
-        >
+        <Typography variant="h4" gutterBottom color={theme.palette.primary.main}>
           Sign In
         </Typography>
         <Box component="form" sx={{ mt: 2 }}>
@@ -121,7 +121,7 @@ const SignIn = () => {
                 sx={{
                   padding: 1.5,
                   borderRadius: 8,
-                  textTransform: "none",
+                  textTransform: 'none',
                   fontSize: 16,
                 }}
               >

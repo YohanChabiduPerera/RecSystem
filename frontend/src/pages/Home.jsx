@@ -8,6 +8,8 @@ import {
   TextField,
   Divider,
 } from "@mui/material";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import MapComponent from "../components/MapComponent";
 
 const Home = () => {
@@ -32,7 +34,7 @@ const Home = () => {
     const userId = localStorage.getItem("user_id");
 
     if (!userId || !selectedLocation) {
-      console.error("User ID or selected location is missing");
+      toast.error("User ID or selected location is missing");
       return;
     }
 
@@ -56,8 +58,10 @@ const Home = () => {
       }
 
       const data = await response.json();
+      toast.success("Rating submitted successfully");
       console.log("Rating submitted successfully:", data);
     } catch (error) {
+      toast.error("Error submitting rating");
       console.error("Error submitting rating:", error);
     }
   };
@@ -67,7 +71,7 @@ const Home = () => {
     const userId = localStorage.getItem("user_id");
 
     if (!userId) {
-      console.error("User ID not found in local storage");
+      toast.error("User ID not found in local storage");
       return;
     }
 
@@ -94,7 +98,7 @@ const Home = () => {
       const data = await response.json();
 
       if (data.recommended_venues.length === 0) {
-        console.log("No venues found.");
+        toast.info("No venues found.");
         setLocations([]);
         return;
       }
@@ -116,74 +120,17 @@ const Home = () => {
         longitude: parseFloat(longitude),
       });
 
+      toast.success("Recommended venue fetched successfully");
       console.log("Recommended venue:", newLocation);
     } catch (error) {
+      toast.error("Error recommending nearby venues");
       console.error("Error recommending nearby venues:", error);
-    }
-  };
-
-    // handle next destination
-  const handleNextDestination = async () => {
-    const userId = localStorage.getItem("user_id");
-
-    if (!userId) {
-      console.error("User ID not found in local storage");
-      return;
-    }
-
-    try {
-      // get the venue history 
-      const userResponse = await fetch(
-        `http://127.0.0.1:5000/getUserById/${userId}`
-      );
-      if (!userResponse.ok) {
-        throw new Error("Failed to fetch user data");
-      }
-      const userData = await userResponse.json();
-      const { venue_history } = userData;
-
-      const nextVenueResponse = await fetch(
-        "http://127.0.0.1:5000/predict_next_venue",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user_id: userId,
-            venue_history: venue_history,
-          }),
-        }
-      );
-
-      if (!nextVenueResponse.ok) {
-        throw new Error("Failed to predict next venue");
-      }
-
-      const nextVenueData = await nextVenueResponse.json();
-      const { coordinates, exact_location, predicted_venue_id } = nextVenueData;
-
-      // re structure json format
-      const newLocation = {
-        id: locations.length + 1,
-        latitude: coordinates.latitude,
-        longitude: coordinates.longitude,
-        name: exact_location.split(",")[0],
-        venue_id: predicted_venue_id,
-        rating: 0,
-      };
-
-      setSelectedLocation(null);
-      setLocations([newLocation]);
-
-      console.log("Next Destination:", newLocation);
-    } catch (error) {
-      console.error("Error predicting next destination:", error);
     }
   };
 
   return (
     <Grid container spacing={4}>
+      <ToastContainer />
       <Grid item xs={9}>
         <MapComponent
           locations={locations}
@@ -232,14 +179,6 @@ const Home = () => {
               onClick={handleRecommendNearbyVenues}
             >
               Recommend Nearby Venues
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleNextDestination}
-              sx={{ marginTop: 2 }}
-            >
-              Next Destination
             </Button>
           </Box>
           <Divider sx={{ margin: "16px 0" }} />
