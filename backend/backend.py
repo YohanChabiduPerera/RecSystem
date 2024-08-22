@@ -8,6 +8,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from geopy.geocoders import Nominatim
 import pandas as pd
+import math
 
 from flask_cors import CORS
 
@@ -127,46 +128,133 @@ def signup():
     return jsonify({'message': 'Signup successful', 'userId': user_id})
 
 
-@app.route('/predict_next_venue', methods=['POST'])
-def predict_next_venue():
+# @app.route('/predict_next_venue', methods=['POST'])
+# def predict_next_venue():
+#     data = request.get_json()
+#     user_id = data['user_id']
+#     user_history = data['venue_history']
+
+#     # Prepare the last 10 venues visited by the user
+#     sample_sequence = le_venue.transform(user_history[-10:])
+#     sample_sequence = pad_sequences([sample_sequence], maxlen=10)
+
+#     # Predict the next venue
+#     lstm_prediction = lstm_model.predict(sample_sequence).argmax(axis=1)[0]
+#     predicted_venue_id = le_venue.inverse_transform([lstm_prediction])[0]
+
+#     # Save the predicted venue ID to the user's venue history
+#     user_data = load_user()
+#     for user_info in user_data:
+#         if user_info['user_id'] == user_id:
+#             user_info['venue_history'].append(predicted_venue_id)
+#             break
+#     save_user(user_data)
+
+
+#     # Find the venue category and location
+#     predicted_venue_row = df[df['venueId'] == predicted_venue_id].iloc[0]
+#     predicted_venue_category = predicted_venue_row['venueCategory']
+#     predicted_venue_latitude = predicted_venue_row['latitude']
+#     predicted_venue_longitude = predicted_venue_row['longitude']
+
+#      # Get the exact location using reverse geocoding
+#     exact_location, coordinates = get_exact_location(predicted_venue_latitude, predicted_venue_longitude)
+
+#     response = {
+#         'predicted_venue_id': predicted_venue_id,
+#         'predicted_venue_category': predicted_venue_category,
+#         'exact_location': exact_location,
+#         'coordinates': coordinates
+#     }
+
+#     return jsonify(response)
+
+def predict_lstm(venue_history):
+    sample_sequence = le_venue.transform(venue_history[-10:])
+    sample_sequence = pad_sequences([sample_sequence], maxlen=10)
+    lstm_prediction = lstm_model.predict(sample_sequence).argmax(axis=1)[0]
+    return le_venue.inverse_transform([lstm_prediction])[0]
+
+def recommend_knn(user_latitude, user_longitude):
+    user_location = np.array([[user_latitude, user_longitude]])
+    knn_distances, knn_indices = knn_model.kneighbors(user_location)
+    return df.iloc[knn_indices[0]].to_dict('records')
+
+def calculate_distance(lat1, lon1, lat2, lon2):
+    # Radius of the Earth in kilometers
+    R = 6371
+
+    # Convert latitude and longitude to radians
+    lat1_rad = math.radians(lat1)
+    lon1_rad = math.radians(lon1)
+    lat2_rad = math.radians(lat2)
+    lon2_rad = math.radians(lon2)
+
+    # Difference in coordinates
+    dlat = lat2_rad - lat1_rad
+    dlon = lon2_rad - lon1_rad
+
+    # Haversine formula
+    a = math.sin(dlat/2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon/2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+
+    # Calculate the distance
+    distance = R * c
+
+    return distance
+
+
+
+@app.route('/recommend_destination', methods=['POST'])
+def recommend_destination():
     data = request.get_json()
     user_id = data['user_id']
-    user_history = data['venue_history']
+    user_latitude = data['user_latitude']
+    user_longitude = data['user_longitude']
 
-    # Prepare the last 10 venues visited by the user
-    sample_sequence = le_venue.transform(user_history[-10:])
-    sample_sequence = pad_sequences([sample_sequence], maxlen=10)
-
-    # Predict the next venue
-    lstm_prediction = lstm_model.predict(sample_sequence).argmax(axis=1)[0]
-    predicted_venue_id = le_venue.inverse_transform([lstm_prediction])[0]
-
-    # Save the predicted venue ID to the user's venue history
     user_data = load_user()
-    for user_info in user_data:
-        if user_info['user_id'] == user_id:
-            user_info['venue_history'].append(predicted_venue_id)
-            break
-    save_user(user_data)
+    user_info = next((user for user in user_data if user['user_id'] == user_id), None)
 
+    if user_info and len(user_info['venue_history']) >= 10:
+        lstm_prediction = predict_lstm(user_info['venue_history'])
+        lstm_venue = df[df['venueId'] == lstm_prediction].iloc[0]
+        lstm_score = 1  # Base score for LSTM prediction
 
-    # Find the venue category and location
-    predicted_venue_row = df[df['venueId'] == predicted_venue_id].iloc[0]
-    predicted_venue_category = predicted_venue_row['venueCategory']
-    predicted_venue_latitude = predicted_venue_row['latitude']
-    predicted_venue_longitude = predicted_venue_row['longitude']
+        knn_venues = recommend_knn(user_latitude, user_longitude)
+        
+        combined_venues = [lstm_venue] + knn_venues
+        
+        # Score venues based on distance from user and LSTM prediction
+        for venue in combined_venues:
+            venue_lat, venue_lon = venue['latitude'], venue['longitude']
+            distance = calculate_distance(user_latitude, user_longitude, venue_lat, venue_lon)
+            venue['score'] = 1 / (1 + distance)
+            if venue['venueId'] == lstm_prediction:
+                venue['score'] += lstm_score
 
-     # Get the exact location using reverse geocoding
-    exact_location, coordinates = get_exact_location(predicted_venue_latitude, predicted_venue_longitude)
+        best_venue = max(combined_venues, key=lambda x: x['score'])
 
+    else:
+        # Use only KNN model for cold start
+        knn_venues = recommend_knn(user_latitude, user_longitude)
+        best_venue = knn_venues[0]
+
+    # Prepare the response
+    exact_location, coordinates = get_exact_location(best_venue['latitude'], best_venue['longitude'])
     response = {
-        'predicted_venue_id': predicted_venue_id,
-        'predicted_venue_category': predicted_venue_category,
-        'exact_location': exact_location,
+        'venue_id': best_venue['venueId'],
+        'venue_category': best_venue['venueCategory'],
+        'location': exact_location,
         'coordinates': coordinates
     }
 
+    # Update user's venue history
+    if user_info:
+        user_info['venue_history'].append(best_venue['venueId'])
+        save_user(user_data)
+
     return jsonify(response)
+
 
 @app.route('/submit_rating', methods=['POST'])
 def submit_rating():
